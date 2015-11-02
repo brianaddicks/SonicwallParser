@@ -12,5 +12,6 @@ namespace SonicwallParser {
 		public string Name;
 		public string Description;
 		public List<string> Members;
+		public List<string> Expanded;
     }
 }

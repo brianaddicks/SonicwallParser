@@ -1,4 +1,4 @@
-function Get-SwAddressGroup {
+function Get-SwServiceGroup {
     [CmdletBinding()]
 	<#
         .SYNOPSIS
@@ -10,7 +10,7 @@ function Get-SwAddressGroup {
 		[array]$ShowSupportOutput
 	)
 	
-	$VerbosePrefix = "Get-SwAddressGroup:"
+	$VerbosePrefix = "Get-SwServiceGroup:"
 	
 	$IpRx = [regex] "(\d+\.){3}\d+"
 	
@@ -37,7 +37,7 @@ function Get-SwAddressGroup {
 		###########################################################################################
 		# Check for the Section
 		
-		$Regex = [regex] '^--Address Group Table--$'
+		$Regex = [regex] '^--Service Group Table--$'
 		$Match = HelperEvalRegex $Regex $line
 		if ($Match) {
 			$InSection = $true
@@ -82,7 +82,6 @@ function Get-SwAddressGroup {
 				$EvalParams.Regex          = [regex] '^\ +member\:\ Name:(.+?)(\ Handle)'
 				$Eval                      = HelperEvalRegex @EvalParams -ReturnGroupNum 1
 				if ($Eval) { $NewObject.Members += $Eval }
-				
 			}
 		}
 	}	

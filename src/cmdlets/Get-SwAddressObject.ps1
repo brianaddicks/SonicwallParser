@@ -1,4 +1,4 @@
-function Get-SwAddressGroup {
+function Get-SwAddressObject {
     [CmdletBinding()]
 	<#
         .SYNOPSIS
@@ -10,7 +10,7 @@ function Get-SwAddressGroup {
 		[array]$ShowSupportOutput
 	)
 	
-	$VerbosePrefix = "Get-SwAddressGroup:"
+	$VerbosePrefix = "Get-SwAddressObject:"
 	
 	$IpRx = [regex] "(\d+\.){3}\d+"
 	
@@ -37,7 +37,7 @@ function Get-SwAddressGroup {
 		###########################################################################################
 		# Check for the Section
 		
-		$Regex = [regex] '^--Address Group Table--$'
+		$Regex = [regex] '^--Address Object Table--$'
 		$Match = HelperEvalRegex $Regex $line
 		if ($Match) {
 			$InSection = $true
@@ -78,11 +78,26 @@ function Get-SwAddressGroup {
 				$EvalParams.StringToEval     = $line
 				
 				
-				# DhcpRelayEnabled
-				$EvalParams.Regex          = [regex] '^\ +member\:\ Name:(.+?)(\ Handle)'
-				$Eval                      = HelperEvalRegex @EvalParams -ReturnGroupNum 1
-				if ($Eval) { $NewObject.Members += $Eval }
+				# Host
+				$EvalParams.Regex          = [regex] "^HOST:\ (?<value>$IpRx)" 
+				$Eval                      = HelperEvalRegex @EvalParams
+				if ($Eval) {
+					$NewObject.Members = $Eval.Groups['value'].Value + "/32"
+				}
 				
+				# Network
+				$EvalParams.Regex          = [regex] "^NETWORK:\ (?<net>$IpRx)\ -\ (?<mask>$IpRx)" 
+				$Eval                      = HelperEvalRegex @EvalParams
+				if ($Eval) {
+					$NewObject.Members = $Eval.Groups['net'].Value + '/' + (ConvertTo-MaskLength $Eval.Groups['mask'].Value)
+				}
+				
+				# FQDN
+				$EvalParams.Regex          = [regex] "^FQDN:\ (.+)"
+				$Eval                      = HelperEvalRegex @EvalParams -ReturnGroupNum 1
+				if ($Eval) {
+					$NewObject.Members = $Eval
+				}
 			}
 		}
 	}	

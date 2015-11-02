@@ -1,4 +1,4 @@
-function Get-SwAddressGroup {
+function Get-SwServiceObject {
     [CmdletBinding()]
 	<#
         .SYNOPSIS
@@ -10,7 +10,7 @@ function Get-SwAddressGroup {
 		[array]$ShowSupportOutput
 	)
 	
-	$VerbosePrefix = "Get-SwAddressGroup:"
+	$VerbosePrefix = "Get-SwServiceObject:"
 	
 	$IpRx = [regex] "(\d+\.){3}\d+"
 	
@@ -37,7 +37,7 @@ function Get-SwAddressGroup {
 		###########################################################################################
 		# Check for the Section
 		
-		$Regex = [regex] '^--Address Group Table--$'
+		$Regex = [regex] '^--Service Object Table--$'
 		$Match = HelperEvalRegex $Regex $line
 		if ($Match) {
 			$InSection = $true
@@ -78,11 +78,37 @@ function Get-SwAddressGroup {
 				$EvalParams.StringToEval     = $line
 				
 				
-				# DhcpRelayEnabled
-				$EvalParams.Regex          = [regex] '^\ +member\:\ Name:(.+?)(\ Handle)'
-				$Eval                      = HelperEvalRegex @EvalParams -ReturnGroupNum 1
-				if ($Eval) { $NewObject.Members += $Eval }
-				
+				# Protocol/Port
+				$EvalParams.Regex          = [regex] "^IpType:\ (?<type>\d+),\ +Ports:\ (?<start>\d+)~(?<stop>\d+)" 
+				$Eval                      = HelperEvalRegex @EvalParams
+				if ($Eval) {
+					$Protocol = $Eval.Groups['type'].Value
+					$Start    = $Eval.Groups['start'].Value
+					$Stop     = $Eval.Groups['stop'].Value
+					
+					$ProtocolHash = @{
+						'6'   = 'tcp'
+						'17'  = 'udp'
+						'50'  = 'exp'
+						'1'   = 'icmp'
+						'108' = 'ipcomp'
+						'41'  = 'ipv6'
+						'47'  = 'gre'
+					    '58'  = 'ipv6-icmp'
+						'2'   = 'igmp'
+					}
+					
+					$NewProtocol = $ProtocolHash.$Protocol
+					if (!($NewProtocol)) { Throw "unknown protocol: $Protocol" }
+					
+					if ($Start -eq $Stop) {
+						$Ports = $Start
+					} else {
+						$Ports = $Start + '-' + $Stop
+					}
+					
+					$NewObject.Members = $NewProtocol + '/' + $Ports
+				}
 			}
 		}
 	}	
