@@ -206,5 +206,6 @@ if ($PushToStrap) {
     $FilesToZip = ls "$PSScriptRoot\$ModuleName*" -Exclude *.zip
     $CreateZip = ZipFiles -ZipFilePath "$PSScriptRoot\$ModuleName.zip" -SourceFiles $FilesToZip -Force
     $StageFolder = "\\vmware-host\Shared Folders\Dropbox\strap\stages\$ModuleName\"
+    if (!(Test-Path $StageFolder)) { mkdir $StageFolder }
     $Copy = Copy-Item "$PSScriptRoot\$ModuleName.zip" $StageFolder -Force
 }
