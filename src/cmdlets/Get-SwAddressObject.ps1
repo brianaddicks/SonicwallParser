@@ -60,12 +60,13 @@ function Get-SwAddressObject {
 			###########################################################################################
 			# New Object
 					
-			$Regex = [regex] '-------(?<name>.+?)(\((?<description>.+?)\))?-------'
+			$Regex = [regex] '^-------(?<name>.+?)((?<!\ )\((?<desc>.+)\)(?=-))?-------$'
 			$Match = HelperEvalRegex $Regex $line
 			if ($Match) {
 				$NewObject              = New-Object -TypeName SonicwallParser.FirewallObject
 				$NewObject.Name         = $Match.Groups['name'].Value
 				$NewObject.Description  = $Match.Groups['description'].Value
+				$NewObject.Type         = "address"
 				$ReturnObject          += $NewObject
 			}
 	
@@ -79,24 +80,31 @@ function Get-SwAddressObject {
 				
 				
 				# Host
-				$EvalParams.Regex          = [regex] "^HOST:\ (?<value>$IpRx)" 
+				$EvalParams.Regex          = [regex] "^(?<type>HOST):\ (?<value>$IpRx)" 
 				$Eval                      = HelperEvalRegex @EvalParams
 				if ($Eval) {
 					$NewObject.Members = $Eval.Groups['value'].Value + "/32"
 				}
 				
 				# Network
-				$EvalParams.Regex          = [regex] "^NETWORK:\ (?<net>$IpRx)\ -\ (?<mask>$IpRx)" 
+				$EvalParams.Regex          = [regex] "^(?<type>NETWORK):\ (?<net>$IpRx)\ -\ (?<mask>$IpRx)"
 				$Eval                      = HelperEvalRegex @EvalParams
 				if ($Eval) {
 					$NewObject.Members = $Eval.Groups['net'].Value + '/' + (ConvertTo-MaskLength $Eval.Groups['mask'].Value)
 				}
 				
 				# FQDN
-				$EvalParams.Regex          = [regex] "^FQDN:\ (.+)"
+				$EvalParams.Regex          = [regex] "^(?<type>FQDN):\ (.+)"
 				$Eval                      = HelperEvalRegex @EvalParams -ReturnGroupNum 1
 				if ($Eval) {
 					$NewObject.Members = $Eval
+				}
+				
+				# Range
+				$EvalParams.Regex          = [regex] "^(?<type>RANGE):\ (?<start>$IpRx)\ -\ (?<stop>$IpRx)"
+				$Eval                      = HelperEvalRegex @EvalParams
+				if ($Eval) {
+					$NewObject.Members = $Eval.Groups['start'].Value + '-' + $Eval.Groups['stop'].Value
 				}
 			}
 		}

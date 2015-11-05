@@ -10,7 +10,6 @@ using System.Web;
 namespace SonicwallParser {
 	public class AccessPolicy {
 		public int Number;
-		public string Name;
 		public string Comment;
 		public string Action;
 		public bool Enabled;

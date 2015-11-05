@@ -60,12 +60,13 @@ function Get-SwServiceGroup {
 			###########################################################################################
 			# New Object
 					
-			$Regex = [regex] '-------(?<name>.+?)(\((?<description>.+?)\))?-------'
+			$Regex = [regex] '^-------(?<name>.+?)((?<!\ )\((?<desc>.+)\)(?=-))?-------$'
 			$Match = HelperEvalRegex $Regex $line
 			if ($Match) {
 				$NewObject              = New-Object -TypeName SonicwallParser.FirewallObject
 				$NewObject.Name         = $Match.Groups['name'].Value
 				$NewObject.Description  = $Match.Groups['description'].Value
+				$NewObject.Type         = "service-group"
 				$ReturnObject          += $NewObject
 			}
 	

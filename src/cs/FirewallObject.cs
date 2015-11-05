@@ -11,6 +11,7 @@ namespace SonicwallParser {
 	public class FirewallObject {
 		public string Name;
 		public string Description;
+		public string Type;
 		public List<string> Members;
 		public List<string> Expanded;
     }

@@ -7,7 +7,7 @@ function Resolve-SwObject {
 
 	Param (
 		[Parameter(Mandatory=$True,Position=0)]
-		[array]$Objects,
+		[string]$ObjectName,
 		
 		[Parameter(Mandatory=$True,Position=1)]
 		[array]$ObjectTable
@@ -22,33 +22,22 @@ function Resolve-SwObject {
 	$TotalLines = $ShowSupportOutput.Count
 	$i          = 0 
 	$StopWatch  = [System.Diagnostics.Stopwatch]::StartNew() # used by Write-Progress so it doesn't slow the whole function down
+	$ParentId   = Get-Random
 	
 	$ReturnObject = @()
 	
-	foreach ($Object in $Objects) {
-		$i++
-		
-		if ($StopWatch.Elapsed.TotalMilliseconds -ge 1000) {
-			$PercentComplete = [math]::truncate($i / $Objects.Count * 100)
-	        Write-Progress -Activity "Resolving Objects" -Status "$PercentComplete% $i/$($Object.Count)" -PercentComplete $PercentComplete
-	        $StopWatch.Reset()
-			$StopWatch.Start()
-		}
-		
-		if ($Object.Members) {
-			foreach ($Member in $Object.Members) {
+	$Lookup = $ObjectTable | ? { $_.Name -ceq $ObjectName }
+	switch ($Lookup.Type) {
+		{ $_ -match '-group' } {
+			foreach ($Member in $Lookup.Members) {
 				$ReturnObject += Resolve-SwObject $Member $ObjectTable
 			}
-		} else {
-			$Lookup = $ObjectTable | ? { $_.Name -ceq $Object }
-			if ($Lookup) {
-				if ($Lookup.Members) {
-					$ReturnObject += Resolve-SwObject $Lookup.Members $ObjectTable
-				}
-			} else {
-				$ReturnObject += $Object
-			}
 		}
+		default {
+			if ($Lookup.Members) {
+				$ReturnObject += $Lookup.Members
+			}
+		} 
 	}
 	
 	return $ReturnObject
