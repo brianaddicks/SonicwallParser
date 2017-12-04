@@ -22,6 +22,7 @@ function Resolve-SwField {
 	$ReturnObject  = @()
 	
 	foreach ($Policy in $Policies) {
+		Write-Verbose "$VerbosePrefix Resolving `"$Field`" for Policy: $($Policy.SourceZone) -> $($Policy.DestinationZone): $($Policy.Number)"
 		$i++
 		$TotalCount                     = $Policies.Count
 		$PercentComplete                = [math]::truncate($i / $TotalCount * 100)

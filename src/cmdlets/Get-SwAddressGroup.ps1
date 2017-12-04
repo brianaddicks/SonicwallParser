@@ -67,6 +67,7 @@ function Get-SwAddressGroup {
 				$NewObject.Name         = $Match.Groups['name'].Value
 				$NewObject.Description  = $Match.Groups['description'].Value
 				$NewObject.Type         = "address-group"
+				Write-Verbose "$VerbosePrefix adding object: $($NewObject.Name)"
 				$ReturnObject          += $NewObject
 			}
 	
@@ -79,10 +80,24 @@ function Get-SwAddressGroup {
 				$EvalParams.StringToEval     = $line
 				
 				
-				# DhcpRelayEnabled
+				# Members (older firmware)
 				$EvalParams.Regex          = [regex] '^\ +member\:\ Name:(.+?)(\ Handle)'
 				$Eval                      = HelperEvalRegex @EvalParams -ReturnGroupNum 1
 				if ($Eval) { $NewObject.Members += $Eval }
+
+				# Members (newer firmware)
+				$EvalParams.Regex          = [regex] '^\ +member\:\ (.+)'
+				$Eval                      = HelperEvalRegex @EvalParams -ReturnGroupNum 1
+				if ($Eval) {
+					$MemberNames = $Eval.Split(',')
+					Write-Verbose "$VerbosePrefix $Eval"
+					foreach ($member in $MemberNames) {
+						$NewMember = $member.Trim()
+						if ($NewMember -ne "") {
+							$NewObject.Members += $NewMember
+						}
+					}
+				}
 				
 			}
 		}

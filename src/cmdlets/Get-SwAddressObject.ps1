@@ -7,7 +7,10 @@ function Get-SwAddressObject {
 
 	Param (
 		[Parameter(Mandatory=$True,Position=0)]
-		[array]$ShowSupportOutput
+		[array]$ShowSupportOutput,
+
+		[Parameter(Mandatory=$False,Position=1)]
+		[array]$AddressGroups
 	)
 	
 	$VerbosePrefix = "Get-SwAddressObject:"
@@ -105,6 +108,23 @@ function Get-SwAddressObject {
 				$Eval                      = HelperEvalRegex @EvalParams
 				if ($Eval) {
 					$NewObject.Members = $Eval.Groups['start'].Value + '-' + $Eval.Groups['stop'].Value
+				}
+
+				# Check for Group Membership
+
+				if ($AddressGroups) {
+					# Host
+					$EvalParams.Regex          = [regex] "^\ +Group\ \(Member\ of\):\ +(.+)," 
+					$Eval                      = HelperEvalRegex @EvalParams -ReturnGroupNum 1
+					if ($Eval) {
+						$GroupLookup = $AddressGroups | Where-Object { $_.Name -eq $Eval }
+						if ($GroupLookup) {
+							$GroupLookup.Members += $Eval
+						} else {
+							Throw "$VerbosePrefix Group Lookup Failed for $($NewObject.Name): $Eval"
+						}
+					}
+
 				}
 			}
 		}

@@ -70,7 +70,7 @@ function Get-SwAccessPolicy {
 			###########################################################################################
 			# New Object
 					
-			$Regex = [regex] '^Rule\ (?<number>\d+)\ (?<action>\w+)\ Service\ (?<source>.+?)(\ -\>)\ (?<service>.+?)(\ \((?<status>\w+)\))'
+			$Regex = [regex] '^Rule\ (?<number>\d+)\ (?<action>\w+)\ Service\ (?<source>.+?)(\ -\>)\ (?<service>.+?)(\ \((?<status>\w+)\))$'
 			$Eval  = HelperEvalRegex $Regex $line
 			if ($Eval) {
 				$NewObject                     = New-Object -TypeName SonicwallParser.AccessPolicy
@@ -84,7 +84,7 @@ function Get-SwAccessPolicy {
 				switch ($Status) {
 					Enabled  { $Status = $true }
 					Disabled { $Status = $false }
-					default  { Throw "unknown status: $Status"}
+					default  { Throw "unknown status on line $i : $Status"}
 				}
 				$NewObject.Enabled             = $Status
 				

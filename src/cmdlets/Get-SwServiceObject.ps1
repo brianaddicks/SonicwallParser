@@ -97,10 +97,11 @@ function Get-SwServiceObject {
 						'47'  = 'gre'
 					    '58'  = 'ipv6-icmp'
 						'2'   = 'igmp'
+						'89'  = 'ospf'
 					}
 					
 					$NewProtocol = $ProtocolHash.$Protocol
-					if (!($NewProtocol)) { Throw "unknown protocol: $Protocol" }
+					if (!($NewProtocol)) { Throw "unknown protocol line $i : $Protocol" }
 					
 					if ($Start -eq $Stop) {
 						$Ports = $Start

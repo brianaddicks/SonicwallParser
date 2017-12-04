@@ -25,6 +25,7 @@ function Resolve-SwPolicy {
 				"SourceService"
 				"DestinationService"
 			)
+			Write-Verbose "$VerbosePrefix Resolving AccessPolicies"
 		}
 		NatPolicy {
 			$Fields = @(
@@ -35,6 +36,7 @@ function Resolve-SwPolicy {
 				"OriginalService"
 				"TranslatedService"
 			)
+			Write-Verbose "$VerbosePrefix Resolving NatPolicies"
 		}
 		default {
 			Throw "Array must contain objects of type NatPolicy or AccessPolicy"
@@ -58,7 +60,7 @@ function Resolve-SwPolicy {
 		if ($i -eq 1) {
 			$ReturnObject = Resolve-SwField $Policies Source $ObjectTable
 		} else {
-			$ReturnObject = Resolve-SwField $ReturnObject $Field $ObjectTable
+			$ReturnObject += Resolve-SwField $ReturnObject $Field $ObjectTable
 		}
 	}
 	
