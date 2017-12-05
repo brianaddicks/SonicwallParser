@@ -45,6 +45,7 @@ function Resolve-SwPolicy {
 	
 	$Global:SwPolicyId = Get-Random
 	foreach ($Field in $Fields) {
+		Write-Verbose "$VerbosePrefix Resolving Field: $Field"
 		$i++
 		$TotalCount                     = $Fields.Count
 		$PercentComplete                = [math]::truncate($i / $TotalCount * 100)
@@ -58,9 +59,9 @@ function Resolve-SwPolicy {
 		Write-Progress @ProgressParams
 		
 		if ($i -eq 1) {
-			$ReturnObject = Resolve-SwField $Policies Source $ObjectTable
+			$ReturnObject = Resolve-SwField $Policies $Field $ObjectTable
 		} else {
-			$ReturnObject += Resolve-SwField $ReturnObject $Field $ObjectTable
+			$ReturnObject = Resolve-SwField $ReturnObject $Field $ObjectTable
 		}
 	}
 	

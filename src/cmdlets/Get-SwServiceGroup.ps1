@@ -79,10 +79,24 @@ function Get-SwServiceGroup {
 				$EvalParams.StringToEval     = $line
 				
 				
-				# DhcpRelayEnabled
+				# Members (older firmware)
 				$EvalParams.Regex          = [regex] '^\ +member\:\ Name:(.+?)(\ Handle)'
 				$Eval                      = HelperEvalRegex @EvalParams -ReturnGroupNum 1
 				if ($Eval) { $NewObject.Members += $Eval }
+
+				# Members (newer firmware)
+				$EvalParams.Regex          = [regex] '^\ +member\:\ (.+)'
+				$Eval                      = HelperEvalRegex @EvalParams -ReturnGroupNum 1
+				if ($Eval) {
+					$MemberNames = $Eval.Split(',')
+					Write-Verbose "$VerbosePrefix $Eval"
+					foreach ($member in $MemberNames) {
+						$NewMember = $member.Trim()
+						if ($NewMember -ne "") {
+							$NewObject.Members += $NewMember
+						}
+					}
+				}
 			}
 		}
 	}	

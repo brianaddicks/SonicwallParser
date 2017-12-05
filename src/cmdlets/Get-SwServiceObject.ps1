@@ -11,8 +11,20 @@ function Get-SwServiceObject {
 	)
 	
 	$VerbosePrefix = "Get-SwServiceObject:"
-	
-	$IpRx = [regex] "(\d+\.){3}\d+"
+
+	#Ip Protocol Numbers
+	$ProtocolHash = @{
+		'6'   = 'tcp'
+		'17'  = 'udp'
+		'50'  = 'exp'
+		'1'   = 'icmp'
+		'108' = 'ipcomp'
+		'41'  = 'ipv6'
+		'47'  = 'gre'
+		'58'  = 'ipv6-icmp'
+		'2'   = 'igmp'
+		'89'  = 'ospf'
+	}
 	
 	$TotalLines = $ShowSupportOutput.Count
 	$i          = 0 
@@ -77,28 +89,15 @@ function Get-SwServiceObject {
 				# Eval Parameters for this section
 				$EvalParams = @{}
 				$EvalParams.StringToEval     = $line
-				
-				
+
 				# Protocol/Port
-				$EvalParams.Regex          = [regex] "^IpType:\ (?<type>\d+),\ +Ports:\ (?<start>\d+)~(?<stop>\d+)" 
+				$EvalParams.Regex          = [regex] "^IpType:\ (?<type>\d+),\ *Ports:\ (?<start>\d+)~(?<stop>\d+)" 
 				$Eval                      = HelperEvalRegex @EvalParams
+
 				if ($Eval) {
 					$Protocol = $Eval.Groups['type'].Value
 					$Start    = $Eval.Groups['start'].Value
 					$Stop     = $Eval.Groups['stop'].Value
-					
-					$ProtocolHash = @{
-						'6'   = 'tcp'
-						'17'  = 'udp'
-						'50'  = 'exp'
-						'1'   = 'icmp'
-						'108' = 'ipcomp'
-						'41'  = 'ipv6'
-						'47'  = 'gre'
-					    '58'  = 'ipv6-icmp'
-						'2'   = 'igmp'
-						'89'  = 'ospf'
-					}
 					
 					$NewProtocol = $ProtocolHash.$Protocol
 					if (!($NewProtocol)) { Throw "unknown protocol line $i : $Protocol" }

@@ -17,7 +17,7 @@ $AddressObjects = Get-SwAddressObject -ShowSupportOutput $ShowSupportOutput
 $NatPolicies    = Get-SwNatPolicy     -ShowSupportOutput $ShowSupportOutput
 $ServiceObjects = Get-SwServiceObject -ShowSupportOutput $ShowSupportOutput
 $ServiceGroups  = Get-SwServiceGroup  -ShowSupportOutput $ShowSupportOutput
+$AllObjects     = $AddressGroups + $AddressObjects + $ServiceGroups + $ServiceObjects
 
-$AllObjects = $AddressGroups + $AddressObjects + $ServiceGroups + $ServiceObjects
-
-$ResolvedAccessPolicies = Resolve-SwPolicy -Policies $AccessPolicies -ObjectTable $AllObjects 
+$ResolvedAccessPolicies = Resolve-SwPolicy -Policies $AccessPolicies -ObjectTable $AllObjects
+$ResolvedNatPolicies    = Resolve-SwPolicy -Policies $NatPolicies -ObjectTable $AllObjects

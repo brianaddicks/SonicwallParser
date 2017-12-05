@@ -17,11 +17,14 @@ function Resolve-SwField {
 	)
 	
 	$VerbosePrefix = "Resolve-SwField:"
+	Write-Verbose "$VerbosePrefix Field: $Field"
 	$Field         = $Field.substring(0,1).toupper() + $Field.substring(1).tolower()
 	$i             = 0
 	$ReturnObject  = @()
+	Write-Verbose "$VerbosePrefix Field: $Field"
 	
 	foreach ($Policy in $Policies) {
+		$global:policytest = $Policy
 		Write-Verbose "$VerbosePrefix Resolving `"$Field`" for Policy: $($Policy.SourceZone) -> $($Policy.DestinationZone): $($Policy.Number)"
 		$i++
 		$TotalCount                     = $Policies.Count
